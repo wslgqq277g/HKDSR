@@ -1,0 +1,151 @@
+# TODO
+# general settings
+scale: 2
+num_gpu: 1  # set num_gpu: 0 for cpu mode
+manual_seed: 10
+
+
+
+#degradation
+resize_prob: [0, 0.6, 0.4]  # up, down, keep
+resize_range: [0.35, 1.5]
+gaussian_noise_prob: 0.5
+noise_range: [1, 30]
+poisson_scale_range: [0.05, 3]
+gray_noise_prob: 0.4
+jpeg_range: [30, 95]
+deg_prob: [0.34, 0.33, 0.33]
+
+
+# dataset and data loader settings
+datasets:
+  train:
+    name: DIV2K
+    type: PairedImageDataset
+    dataroot_gt: data/DIV2K/DIV2K_train_HR_sub
+    dataroot_lq: data/DIV2K/DIV2K_train_LR_bicubic/X2_sub
+#    dataroot_gt: /home/isalab303/XXX/data/DIV2K/DIV2K_train_HR_sub
+#    dataroot_lq: /home/isalab303/XXX/data/DIV2K/DIV2K_train_LR_bicubic/X2_sub
+    # (for lmdb)
+    # dataroot_gt: datasets/DIV2K/DIV2K_train_HR_sub.lmdb
+    # dataroot_lq: datasets/DIV2K/DIV2K_train_LR_bicubic_X2_sub.lmdb
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+      # (for lmdb)
+      # type: lmdb
+    #kernel:
+    blur_kernel_size: 21
+    kernel_list: ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso']
+    kernel_prob: [0.45, 0.25, 0.12, 0.03, 0.12, 0.03]
+    sinc_prob: 0.1
+    blur_sigma: [0.2, 3]
+    betag_range: [0.5, 4]
+    betap_range: [1, 2]
+
+    gt_size: 96
+    use_hflip: true
+    use_rot: true
+
+    # data loader
+    num_worker_per_gpu: 6
+    batch_size_per_gpu: 48
+    dataset_enlarge_ratio: 100
+    prefetch_mode: ~
+
+  val:
+    name: Set5
+    type: PairedImageDataset
+#    dataroot_gt: /home/isalab303/XXX/data/benchmark/Set5/GTmod12
+#    dataroot_lq: /home/isalab303/XXX/data/benchmark/Set5/LRbicx2
+    dataroot_gt: data/Set5/GTmod12
+    dataroot_lq: data/Set5/LRbicx2
+    io_backend:
+      type: disk
+
+# network structures
+name: RCANx2_ft2
+model_type: sharedup_ft_SRModel
+#model_type: SRModel
+
+logger:
+  print_freq: 100
+  save_checkpoint_freq: !!float 1.5e3
+  use_tb_logger: true
+  wandb:
+    project: test-project
+    resume_id: ~
+    note: RCANx2_ft2
+    id: RCANx2_ft2
+propotion: 2
+
+network_g:
+  type: RCAN_sharedup
+  n_resgroups: 10
+  n_resblocks: 20
+  n_feats: 64
+  reduction: 16
+  scale: 2
+  rgb_range: 255
+  n_colors: 3
+  pretrained: True
+#  path: /home/xiangchuang/glr/teacher_checkpoint/RCAN_BIX2.pt
+#  path: /home/xiangchuang/glr/teacher_checkpoint/RCAN_BIX2.pt
+  path: /home/glinrui/teacher_checkpoint/RCAN_BIX2.pt
+  group_id: [0,2,4,6,8]
+  tea: False
+  kd: False
+
+# path
+path:
+  pretrain_network_g: ~
+  pretrain_network_t: ~
+  strict_load_g: true
+  resume_state: ~
+
+# training settings
+
+
+train:
+  ema_decay: 0.999
+  optim_g:
+    type: Adam
+    lr: !!float 1e-5
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [300000]
+    gamma: 0.5
+
+  total_iter: 200000
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1.0
+    reduction: mean
+#  kd_opt:
+#    type: SimilarityLoss
+#    loss_weight: 2.0
+#    reduction: mean
+
+
+# validation settings
+val:
+  val_freq: !!float 1.5e3
+  save_img: false
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 2
+      test_y_channel: True
+
+# logging settings
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500

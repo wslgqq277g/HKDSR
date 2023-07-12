@@ -1,0 +1,165 @@
+2023-04-15 14:28:11,225 INFO: 
+                ____                _       _____  ____
+               / __ ) ____ _ _____ (_)_____/ ___/ / __ \
+              / __  |/ __ `// ___// // ___/\__ \ / /_/ /
+             / /_/ // /_/ /(__  )/ // /__ ___/ // _, _/
+            /_____/ \__,_//____//_/ \___//____//_/ |_|
+     ______                   __   __                 __      __
+    / ____/____   ____   ____/ /  / /   __  __ _____ / /__   / /
+   / / __ / __ \ / __ \ / __  /  / /   / / / // ___// //_/  / /
+  / /_/ // /_/ // /_/ // /_/ /  / /___/ /_/ // /__ / /<    /_/
+  \____/ \____/ \____/ \____/  /_____/\____/ \___//_/|_|  (_)
+    
+Version Information: 
+	PyTorch: 2.0.0+cpu
+	TorchVision: 0.15.1+cpu
+2023-04-15 14:28:11,227 INFO: 
+  name: Rcanx2_t
+  model_type: SRModel
+  scale: 2
+  num_gpu: 1
+  manual_seed: 10
+  datasets:[
+    train:[
+      name: DIV2K
+      type: PairedImageDataset
+      dataroot_gt: D:\OneDrive\Code repository\sr\data/DIV2K/DIV2K_train_HR_sub
+      dataroot_lq: D:\OneDrive\Code repository\sr\data/DIV2K/DIV2K_train_LR_bicubic/X2_sub
+      filename_tmpl: {}
+      io_backend:[
+        type: disk
+      ]
+      gt_size: 256
+      use_hflip: True
+      use_rot: True
+      num_worker_per_gpu: 6
+      batch_size_per_gpu: 16
+      dataset_enlarge_ratio: 100
+      prefetch_mode: None
+      phase: train
+      scale: 2
+    ]
+    val:[
+      name: Set5
+      type: PairedImageDataset
+      dataroot_gt: D:\OneDrive\Code repository\sr\data/Set5/GTmod12
+      dataroot_lq: D:\OneDrive\Code repository\sr\data/Set5/LRbicx2
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 2
+    ]
+    val_2:[
+      name: Set14
+      type: PairedImageDataset
+      dataroot_gt: D:\OneDrive\Code repository\sr\data/Set14/GTmod12
+      dataroot_lq: D:\OneDrive\Code repository\sr\data/Set14/LRbicx2
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 2
+    ]
+    val_3:[
+      name: B100
+      type: PairedImageDataset
+      dataroot_gt: D:\OneDrive\Code repository\sr\data/B100/GTmod12
+      dataroot_lq: D:\OneDrive\Code repository\sr\data/B100/LRbicx2
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 2
+    ]
+    val_4:[
+      name: Urban100
+      type: PairedImageDataset
+      dataroot_gt: D:\OneDrive\Code repository\sr\data/Urban100/GTmod12
+      dataroot_lq: D:\OneDrive\Code repository\sr\data/Urban100/LRbicx2
+      io_backend:[
+        type: disk
+      ]
+      phase: val
+      scale: 2
+    ]
+  ]
+  network_g:[
+    type: WHN
+    num_in_ch: 3
+    num_out_ch: 3
+    num_feat: 64
+    num_group: 3
+    num_block: 3
+    squeeze_factor: 16
+    upscale: 2
+    res_scale: 1
+    img_range: 255.0
+    rgb_mean: [0.4488, 0.4371, 0.404]
+    path: None
+    pretrained: False
+  ]
+  path:[
+    pretrain_network_g: None
+    strict_load_g: True
+    resume_state: None
+    experiments_root: D:\OneDrive\Code repository\sr\BasicSR-master\experiments\Rcanx2_t
+    models: D:\OneDrive\Code repository\sr\BasicSR-master\experiments\Rcanx2_t\models
+    training_states: D:\OneDrive\Code repository\sr\BasicSR-master\experiments\Rcanx2_t\training_states
+    log: D:\OneDrive\Code repository\sr\BasicSR-master\experiments\Rcanx2_t
+    visualization: D:\OneDrive\Code repository\sr\BasicSR-master\experiments\Rcanx2_t\visualization
+  ]
+  train:[
+    ema_decay: 0.999
+    optim_g:[
+      type: Adam
+      lr: 0.0001
+      weight_decay: 0
+      betas: [0.9, 0.99]
+    ]
+    scheduler:[
+      type: MultiStepLR
+      milestones: [200000]
+      gamma: 0.5
+    ]
+    total_iter: 1
+    warmup_iter: -1
+    pixel_opt:[
+      type: L1Loss
+      loss_weight: 1.0
+      reduction: mean
+    ]
+  ]
+  val:[
+    val_freq: 10.0
+    save_img: False
+    metrics:[
+      psnr:[
+        type: calculate_psnr
+        crop_border: 2
+        test_y_channel: True
+      ]
+    ]
+  ]
+  logger:[
+    print_freq: 100
+    save_checkpoint_freq: 5000.0
+    use_tb_logger: True
+    wandb:[
+      project: test-project
+      resume_id: None
+      note: Rcanx2_scratch
+      id: x2scratch
+    ]
+  ]
+  dist_params:[
+    backend: nccl
+    port: 29500
+  ]
+  dist: False
+  rank: 0
+  world_size: 1
+  auto_resume: False
+  is_train: True
+  root_path: D:\OneDrive\Code repository\sr\BasicSR-master
+

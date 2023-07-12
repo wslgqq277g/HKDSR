@@ -1,2 +1,3 @@
-# HKDSR
+## How to run
+
 Coming soon
